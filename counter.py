@@ -2,7 +2,7 @@ import re
 import collections
 
 # edit here to add more resource
-res_list = ["cpu", "node", "gres/gpu"]
+res_list = ["cpu", "gres/gpu"]
 
 pattern_strings = ["{}=(\d+)".format(res) for res in res_list]
 patterns = [re.compile(pattern_string) for pattern_string in pattern_strings]
@@ -33,11 +33,11 @@ def list_str(the_list):
     return ("{:>4},"*len(the_list)).format(*the_list)[:-1]
 
 def output_dict(the_dict, annotate):
-    print("{}, output in order of {}".format(annotate, list_str(res_list)))
+    print("{}, output in order of {} and job".format(annotate, list_str(res_list)))
     for key, value in the_dict.iteritems():
         print("{:>15}:{}".format(key, list_str(value)))
 
-content_len = len(res_list)
+content_len = len(res_list) + 1 # content + job
 def default_caller():
     return [0] * content_len
 
@@ -46,6 +46,7 @@ name_dict = collections.defaultdict(default_caller)
 platform_dict = collections.defaultdict(default_caller)
 
 def regist_dict(the_dict, key, content):
+    content += [1] # job counter
     val = the_dict[key]
     for idx in range(content_len):
         val[idx] += content[idx]
