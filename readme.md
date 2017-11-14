@@ -13,6 +13,5 @@ cat output.txt | grep Bigvideo
 ```
 * To group results by Name and Platform:
 ```
-sh peeker.sh > output.txt
-python counter.py
+python peeker.py
 ```

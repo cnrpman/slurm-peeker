@@ -1,5 +1,11 @@
+#!/bin/python
+
+from __future__ import print_function
+
 import re
 import collections
+import os
+import time
 
 # edit here to add more resource
 res_list = ["cpu", "gres/gpu"]
@@ -8,17 +14,25 @@ pattern_strings = ["{}=(\d+)".format(res) for res in res_list]
 patterns = [re.compile(pattern_string) for pattern_string in pattern_strings]
 
 # Platform type
-plat_avail = ['Bigvideo', 'P100', 'TITANXP', 'GTX1080']
-plat_tmp = ['Test']
+plats = [['Bigvideo', 'P100', 'TITANXP', 'GTX1080'], ['Test']]
+plat_types = ['O', '~', 'X'] # with permission, temporary, without permission
+
 def plat_classify(platform):
-    if platform in plat_avail:
-        return 'w/'
-    elif platform in plat_tmp:
-        return 'tmp'
-    else:
-        return 'w/o'
+    for idx, plat in enumerate(plats):
+        if platform in plat:
+            return plat_types[idx]
+    return plat_types[-1] # other type
 
 def main():
+    print('Executing peeker.sh...')
+    starttime = time.time()
+    os.chdir(os.path.dirname(__file__))
+    os.system('[ -e output.txt ] && rm output.txt\n'
+              'sh peeker.sh > output.txt')
+    print('Finished at {}'.format(time.strftime("%H:%M:%S")))
+    print('Cost time {:.5}s'.format(time.time() - starttime))
+    print('='*40)
+
     with open('output.txt', 'r') as f:
         for line in f:
             unrolled = line.strip().split('|')
@@ -32,12 +46,12 @@ def main():
                 the_list.append(int(the_ele))
 
             # edit here to add more regist dict
-            regist_dict(name_dict, "[{:<3}] {}".format(plat_classify(platform), name), the_list)
-            regist_dict(platform_dict, "[{:<3}] {}".format(plat_classify(platform), platform), the_list)
+            regist_dict(name_dict, "[{:^1}] {}".format(plat_classify(platform), name), the_list)
+            regist_dict(platform_dict, "[{:^1}] {}".format(plat_classify(platform), platform), the_list)
     
     # edit here to add more output dict
     output_dict(name_dict, "Aggregate by User Name and platform type")
-    print
+    print('='*40)
     output_dict(platform_dict, "Aggregate by Platform")
 
 def list_str(the_list):
